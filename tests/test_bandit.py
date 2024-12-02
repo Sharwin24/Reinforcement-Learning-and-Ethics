@@ -17,7 +17,8 @@ def test_bandit_simple():
 
     _, rewards = agent.fit(env, steps=10, num_bins=10)
     assert len(rewards) == 10, "Should have one reward per step"
-    assert np.all(rewards == np.arange(1, 11)), "Each bin contains its own reward"
+    assert np.all(rewards == np.arange(1, 11)
+                  ), "Each bin contains its own reward"
 
     _, rewards = agent.fit(env, steps=20, num_bins=3)
     msg = "Bin computes average rewards"
@@ -41,7 +42,8 @@ def test_bandit_slots():
     from src.random import rng
     rng.seed()
 
-    env = gymnasium.make('SlotMachines-v0', n_machines=10, mean_range=(-10, 10), std_range=(5, 10))
+    env = gymnasium.make('SlotMachines-v0', n_machines=10,
+                         mean_range=(-10, 10), std_range=(5, 10))
     env.seed(0)
     means = np.array([m.mean for m in env.machines])
 
@@ -78,7 +80,7 @@ def test_bandit_random_argmax():
 
     n_machines = 10
     env = gymnasium.make('SlotMachines-v0', n_machines=n_machines,
-                   mean_range=(-10, 10), std_range=(5, 10))
+                         mean_range=(-10, 10), std_range=(5, 10))
     env.seed(0)
 
     agent = MultiArmedBandit(epsilon=0.2)
@@ -127,7 +129,8 @@ def test_bandit_deterministic():
     from src.random import rng
     rng.seed()
 
-    env = gymnasium.make('SlotMachines-v0', n_machines=10, mean_range=(-10, 10), std_range=(5, 10))
+    env = gymnasium.make('SlotMachines-v0', n_machines=10,
+                         mean_range=(-10, 10), std_range=(5, 10))
     env.seed(0)
     means = np.array([m.mean for m in env.machines])
     state_action_values = means.reshape(1, 10)
