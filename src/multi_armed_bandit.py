@@ -71,9 +71,9 @@ class MultiArmedBandit:
             Let s = int(np.ceil(steps / `num_bins`)), then rewards[0] should
             contain the average reward over the first s steps, rewards[1]
             should contain the average reward over the next s steps, etc.
-            Please note that: The total number of steps will not always divide evenly by the 
-            number of bins. This means the last group of steps may be smaller than the rest of 
-            the groups. In this case, we can't divide by s to find the average reward per step 
+            Please note that: The total number of steps will not always divide evenly by the
+            number of bins. This means the last group of steps may be smaller than the rest of
+            the groups. In this case, we can't divide by s to find the average reward per step
             because we have less than s steps remaining for the last group.
         """
 
@@ -87,7 +87,42 @@ class MultiArmedBandit:
         # reset environment before your first action
         env.reset()
 
-        raise NotImplementedError
+        for step in range(steps):
+            # Choose an action using epsilon-greedy
+            # Either explore or exploit
+            if src.random.rand() < self.epsilon:
+                # explore action
+                action = src.random.choice(n_actions)
+            else:
+                # exploit action
+                # randomly choose one of the tied-for-the-largest values
+                action = src.random.choice(np.where(self.Q == self.Q.max())[0])
+
+            # Perform step
+            state, reward, terminated, _ = env.step(action)
+
+            # Update Q function
+            self.N[action] += 1
+            self.Q[action] += 1 / self.N[action] * (reward - self.Q[action])
+
+            # Store reward
+            all_rewards.append(reward)
+
+            # Calculate average reward
+            s = int(np.ceil(steps / num_bins))
+            if (step + 1) % s == 0:
+                # If the next step is a multiple of a bin
+                # the avg reward gets updated
+                avg_rewards[(step + 1) // s - 1] = np.mean(all_rewards)
+
+            # Reset environment if episode is terminated
+            if terminated:
+                env.reset()
+
+            # Update states
+            state_action_values = np.tile(self.Q, (n_states, 1))
+
+        return state_action_values, avg_rewards
 
     def predict(self, env, state_action_values):
         """
