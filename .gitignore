@@ -1,2 +1,4 @@
 __pycache__/
 .venv
+tests/report.json
+tests/test_result.json
