@@ -1,6 +1,6 @@
 {
-    "score": 0,
-    "tests_passed": 3,
+    "score": 58,
+    "tests_passed": 8,
     "notes": {
         "test_np_suggestions": "PASS:",
         "test_bandit_simple": "FAIL:",
@@ -8,10 +8,10 @@
         "test_bandit_random_argmax": "FAIL:",
         "test_bandit_frozen_lake": "FAIL:",
         "test_bandit_deterministic": "FAIL:",
-        "test_q_learning_simple": "FAIL:",
-        "test_q_learning_slots": "FAIL:",
-        "test_q_learning_frozen_lake": "FAIL:",
-        "test_q_learning_random_argmax": "FAIL:",
-        "test_q_learning_deterministic": "FAIL:"
+        "test_q_learning_simple": "PASS:",
+        "test_q_learning_slots": "PASS:",
+        "test_q_learning_frozen_lake": "PASS:",
+        "test_q_learning_random_argmax": "PASS:",
+        "test_q_learning_deterministic": "PASS:"
     }
 }

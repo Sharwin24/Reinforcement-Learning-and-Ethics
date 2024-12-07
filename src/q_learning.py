@@ -1,5 +1,5 @@
 import numpy as np
-import src.random
+import src.random as random
 
 
 class QLearning:
@@ -89,13 +89,49 @@ class QLearning:
         # set up rewards list, Q(s, a) table
         n_actions, n_states = env.action_space.n, env.observation_space.n
         state_action_values = np.zeros((n_states, n_actions))
-        avg_rewards = np.zeros([num_bins])
-        all_rewards = []
+        rewards = []
+        bin_rewards = []
 
         current_state, _ = env.reset()
 
-        raise NotImplementedError
-        
+        steps_per_bin = int(np.ceil(steps / num_bins))
+
+        for step in range(steps):
+            if random.rand() < self.epsilon:
+                action = random.choice(
+                    list(range(n_actions)))
+            else:
+                max_q_value = np.max(state_action_values[current_state])
+                best_actions = np.where(
+                    state_action_values[current_state] == max_q_value)[0]
+                action = random.choice(best_actions)
+
+            next_state, reward, terminated, truncated, _ = env.step(action)
+
+            bin_rewards.append(reward)
+
+            max_next_q = np.max(state_action_values[next_state])
+            state_action_values[current_state, action] += self.alpha * (
+                reward + self.gamma * max_next_q - state_action_values[current_state, action])
+
+            current_state = next_state
+
+            if terminated or truncated:
+                current_state, _ = env.reset()
+
+            if len(bin_rewards) >= steps_per_bin or step == steps - 1:
+                avg_reward = np.mean(bin_rewards)
+                rewards.append(avg_reward)
+                bin_rewards = []
+
+        rewards = np.array(rewards)
+
+        if len(rewards) < num_bins:
+            rewards = np.pad(rewards, (0, num_bins - len(rewards)),
+                             mode='constant', constant_values=rewards[-1])
+
+        return state_action_values, rewards
+
     def predict(self, env, state_action_values):
         """
         Runs prediction on an OpenAI environment using the policy defined by
@@ -144,4 +180,23 @@ class QLearning:
 
         # reset environment before your first action
         current_state, _ = env.reset()
-        raise NotImplementedError
+
+        while True:
+            max_q_value = np.max(state_action_values[current_state])
+            best_actions = np.where(
+                state_action_values[current_state] == max_q_value)[0]
+
+            action = random.choice(best_actions)
+
+            next_state, reward, terminated, truncated, _ = env.step(action)
+
+            states.append(current_state)
+            actions.append(action)
+            rewards.append(reward)
+
+            current_state = next_state
+
+            if terminated or truncated:
+                break
+
+        return np.array(states), np.array(actions), np.array(rewards)

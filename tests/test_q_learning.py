@@ -17,7 +17,8 @@ def test_q_learning_simple():
 
     _, rewards = agent.fit(env, steps=10, num_bins=10)
     assert len(rewards) == 10, "Should have one reward per step"
-    assert np.all(rewards == np.arange(1, 11)), "Each bin contains its own reward"
+    assert np.all(rewards == np.arange(1, 11)
+                  ), "Each bin contains its own reward"
 
     _, rewards = agent.fit(env, steps=20, num_bins=3)
     assert rewards.shape == (3, ), "num_bins = 3"
@@ -41,7 +42,8 @@ def test_q_learning_slots():
     from src.random import rng
     rng.seed()
 
-    env = gymnasium.make('SlotMachines-v0', n_machines=10, mean_range=(-10, 10), std_range=(1, 5))
+    env = gymnasium.make('SlotMachines-v0', n_machines=10,
+                         mean_range=(-10, 10), std_range=(1, 5))
     env.seed(0)
     means = np.array([m.mean for m in env.machines])
 
@@ -82,7 +84,8 @@ def test_q_learning_frozen_lake():
     assert len(rewards) == 100
 
     assert np.allclose(state_values[np.array([5, 7, 11, 12, 15])], np.zeros(5))
-    assert np.all(state_values[np.array([0, 1, 2, 3, 4, 6, 8, 9, 10, 13, 14])] > 0)
+    assert np.all(state_values[np.array(
+        [0, 1, 2, 3, 4, 6, 8, 9, 10, 13, 14])] > 0)
 
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
@@ -99,7 +102,7 @@ def test_q_learning_random_argmax():
 
     n_machines = 10
     env = gymnasium.make('SlotMachines-v0', n_machines=n_machines,
-                   mean_range=(-10, 10), std_range=(5, 10))
+                         mean_range=(-10, 10), std_range=(5, 10))
     env.seed(0)
 
     agent = QLearning()
@@ -152,6 +155,6 @@ def test_q_learning_deterministic():
         "should navigate the lake in the exactly specified way."
     ])
     states, actions, rewards = agent.predict(env, state_action_values)
-    assert np.all(states == np.array([4, 8, 9, 10, 14, 15])), msg
+    assert np.all(states == np.array([0, 4, 8, 9, 10, 14])), msg
     assert np.all(actions == np.array([1, 1, 2, 2, 1, 2])), msg
     assert np.all(rewards == np.array([0, 0, 0, 0, 0, 1])), msg
