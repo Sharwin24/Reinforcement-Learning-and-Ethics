@@ -1,0 +1,17 @@
+{
+    "score": 0,
+    "tests_passed": 3,
+    "notes": {
+        "test_np_suggestions": "PASS:",
+        "test_bandit_simple": "FAIL:",
+        "test_bandit_slots": "FAIL:",
+        "test_bandit_random_argmax": "FAIL:",
+        "test_bandit_frozen_lake": "FAIL:",
+        "test_bandit_deterministic": "FAIL:",
+        "test_q_learning_simple": "FAIL:",
+        "test_q_learning_slots": "FAIL:",
+        "test_q_learning_frozen_lake": "FAIL:",
+        "test_q_learning_random_argmax": "FAIL:",
+        "test_q_learning_deterministic": "FAIL:"
+    }
+}
