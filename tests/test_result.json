@@ -1,7 +1,7 @@
 {
     "test_np_suggestions": true,
     "test_imports": true,
-    "test_setup": false,
+    "test_setup": true,
     "test_bandit_simple": false,
     "test_bandit_slots": false,
     "test_bandit_random_argmax": false,
