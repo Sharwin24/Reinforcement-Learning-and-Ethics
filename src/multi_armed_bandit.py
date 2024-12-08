@@ -89,7 +89,6 @@ class MultiArmedBandit:
 
         # Calculate steps per bin
         s = int(np.ceil(steps / num_bins))
-        remaining_steps = steps % num_bins  # Handle leftover steps
         for step in range(steps):
             # Epsilon-greedy action selection
             if src.random.rand() < self.epsilon:  # Explore
