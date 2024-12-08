@@ -155,6 +155,6 @@ def test_q_learning_deterministic():
         "should navigate the lake in the exactly specified way."
     ])
     states, actions, rewards = agent.predict(env, state_action_values)
-    assert np.all(states == np.array([0, 4, 8, 9, 10, 14])), msg
+    assert np.all(states == np.array([4, 8, 9, 10, 14, 15])), msg
     assert np.all(actions == np.array([1, 1, 2, 2, 1, 2])), msg
     assert np.all(rewards == np.array([0, 0, 0, 0, 0, 1])), msg
