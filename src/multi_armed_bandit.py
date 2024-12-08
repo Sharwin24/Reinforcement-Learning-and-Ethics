@@ -87,13 +87,18 @@ class MultiArmedBandit:
         # reset environment before your first action
         env.reset()
 
+        # Calculate steps per bin
+        s = int(np.ceil(steps / num_bins))
+        remaining_steps = steps % num_bins  # Handle leftover steps
         for step in range(steps):
             # Epsilon-greedy action selection
             if src.random.rand() < self.epsilon:  # Explore
-                action = src.random.choice(n_actions)
+                action = env.action_space.sample()
             else:  # Exploit
-                action = src.random.choice(
-                    np.flatnonzero(self.Q == self.Q.max()))
+                max_value = self.Q.max()
+                max_actions = [a for a in range(
+                    n_actions) if self.Q[a] == max_value]
+                action = src.random.choice(max_actions)
 
             # Take the action
             next_state, reward, terminated, truncated, _ = env.step(action)
@@ -104,15 +109,13 @@ class MultiArmedBandit:
             self.Q[action] += (reward - self.Q[action]) / self.N[action]
 
             # Check for termination and reset if necessary
-            if terminated:
+            if terminated or truncated:
                 env.reset()
 
             # Update average rewards every bin
-            steps_per_bin = steps // num_bins
-            if (step + 1) % steps_per_bin == 0 or step == steps - 1:
-                avg_reward_bin_index = step // steps_per_bin
-                avg_rewards[avg_reward_bin_index] = np.mean(
-                    all_rewards[-steps_per_bin:])
+            if step % s == 0 or step == steps - 1:
+                rewards_in_bin = all_rewards[-s:]
+                avg_rewards[step // s] = np.mean(rewards_in_bin)
 
         # Duplicate Q-values across all states
         state_action_values = np.tile(self.Q, (n_states, 1))
@@ -159,7 +162,7 @@ class MultiArmedBandit:
         """
 
         # reset environment before your first action
-        state = env.reset()[0]
+        s = env.reset()[0]
         states = []
         actions = []
         rewards = []
@@ -167,14 +170,18 @@ class MultiArmedBandit:
 
         while not (terminated or truncated):
             # Exploit action
-            action = src.random.choice(np.flatnonzero(self.Q == self.Q.max()))
+            max_value = state_action_values[s].max()
+            max_actions = [
+                a for a in range(len(state_action_values[s])) if state_action_values[s][a] == max_value
+            ]
+            action = src.random.choice(max_actions)
             next_state, reward, terminated, truncated, _ = env.step(action)
 
             # Log the results
-            states.append(state)
+            states.append(s)
             actions.append(action)
             rewards.append(reward)
 
-            state = next_state
+            s = next_state
 
         return np.array(states), np.array(actions), np.array(rewards)
