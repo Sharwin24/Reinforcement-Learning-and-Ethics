@@ -1,5 +1,5 @@
 import numpy as np
-import src.random
+import src.random as random
 
 
 class QLearning:
@@ -89,13 +89,48 @@ class QLearning:
         # set up rewards list, Q(s, a) table
         n_actions, n_states = env.action_space.n, env.observation_space.n
         state_action_values = np.zeros((n_states, n_actions))
-        avg_rewards = np.zeros([num_bins])
         all_rewards = []
+        bin_rewards = []
 
         current_state, _ = env.reset()
 
-        raise NotImplementedError
-        
+        s = int(np.ceil(steps / num_bins))
+
+        # Inner loop of Q-Learning
+        for step in range(steps):
+            # Choose action (explore or exploit)
+            if random.rand() < self.epsilon:
+                action = random.choice(
+                    list(range(n_actions)))
+            else:
+                max_q = np.max(state_action_values[current_state])
+                best_actions = np.where(
+                    state_action_values[current_state] == max_q)[0]
+                action = random.choice(best_actions)
+
+            # Move to next state
+            next_state, reward, terminated, truncated, _ = env.step(action)
+
+            all_rewards.append(reward)
+
+            # Update Q-Value
+            max_next_q = np.max(state_action_values[next_state])
+            state_action_values[current_state, action] += self.alpha * (
+                reward + self.gamma * max_next_q - state_action_values[current_state, action])
+
+            current_state = next_state
+
+            if terminated or truncated:
+                current_state, _ = env.reset()
+
+        # Find averaged rewards based on bin size
+        rewards = [np.mean(all_rewards[i:i+s])
+                   for i in range(0, len(all_rewards), s)]
+
+        rewards = np.array(rewards)
+
+        return state_action_values, rewards
+
     def predict(self, env, state_action_values):
         """
         Runs prediction on an OpenAI environment using the policy defined by
@@ -139,9 +174,30 @@ class QLearning:
         """
 
         # setup
-        n_actions, n_states = env.action_space.n, env.observation_space.n
         states, actions, rewards = [], [], []
 
         # reset environment before your first action
         current_state, _ = env.reset()
-        raise NotImplementedError
+
+        done = False
+        while not done:
+            # Exploit action
+            max_q = np.max(state_action_values[current_state])
+            best_actions = np.where(
+                state_action_values[current_state] == max_q)[0]
+            action = random.choice(best_actions)
+
+            # Move to next state
+            next_state, reward, terminated, truncated, _ = env.step(action)
+
+            current_state = next_state
+
+            # Collect state_action_values at next state
+            states.append(current_state)
+            actions.append(action)
+            rewards.append(reward)
+
+            if terminated or truncated:
+                done = True
+
+        return np.array(states), np.array(actions), np.array(rewards)
