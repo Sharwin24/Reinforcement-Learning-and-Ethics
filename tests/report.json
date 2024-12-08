@@ -1,9 +1,9 @@
 {
-    "score": 35,
-    "tests_passed": 7,
+    "score": 43,
+    "tests_passed": 8,
     "notes": {
         "test_np_suggestions": "PASS:",
-        "test_bandit_simple": "FAIL:",
+        "test_bandit_simple": "PASS:",
         "test_bandit_slots": "PASS:",
         "test_bandit_random_argmax": "PASS:",
         "test_bandit_frozen_lake": "PASS:",

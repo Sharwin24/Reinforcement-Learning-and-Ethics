@@ -112,10 +112,15 @@ class MultiArmedBandit:
             if terminated or truncated:
                 env.reset()
 
-            # Update average rewards every bin
-            if step % s == 0 or step == steps - 1:
-                rewards_in_bin = all_rewards[-s:]
-                avg_rewards[step // s] = np.mean(rewards_in_bin)
+            # Compute average rewards for bins
+            for bin_idx in range(num_bins):
+                start_idx = bin_idx * s
+                # Handle last bin to include all remaining steps
+                end_idx = (bin_idx + 1) * \
+                    s if bin_idx < num_bins - 1 else steps
+                rewards_in_bin = all_rewards[start_idx:end_idx]
+                avg_rewards[bin_idx] = np.mean(
+                    rewards_in_bin) if rewards_in_bin else 0.0
 
         # Duplicate Q-values across all states
         state_action_values = np.tile(self.Q, (n_states, 1))
