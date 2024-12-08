@@ -88,41 +88,35 @@ class MultiArmedBandit:
         env.reset()
 
         for step in range(steps):
-            # Choose an action using epsilon-greedy
-            # Either explore or exploit
-            if src.random.rand() < self.epsilon:
-                # explore action
+            # Epsilon-greedy action selection
+            if src.random.rand() < self.epsilon:  # Explore
                 action = src.random.choice(n_actions)
-            else:
-                # exploit action
-                # randomly choose one of the tied-for-the-largest values
-                action = src.random.choice(np.where(self.Q == self.Q.max())[0])
+            else:  # Exploit
+                action = src.random.choice(
+                    np.flatnonzero(self.Q == self.Q.max()))
 
-            # Perform step
-            state, reward, terminated, _ = env.step(action)
-
-            # Update Q function
-            self.N[action] += 1
-            self.Q[action] += 1 / self.N[action] * (reward - self.Q[action])
-
-            # Store reward
+            # Take the action
+            next_state, reward, terminated, truncated, _ = env.step(action)
             all_rewards.append(reward)
 
-            # Calculate average reward
-            s = int(np.ceil(steps / num_bins))
-            if (step + 1) % s == 0:
-                # If the next step is a multiple of a bin
-                # the avg reward gets updated
-                avg_rewards[(step + 1) // s - 1] = np.mean(all_rewards)
+            # Update Q-values
+            self.N[action] += 1
+            self.Q[action] += (reward - self.Q[action]) / self.N[action]
 
-            # Reset environment if episode is terminated
+            # Check for termination and reset if necessary
             if terminated:
                 env.reset()
 
-            # Update states
-            state_action_values = np.tile(self.Q, (n_states, 1))
+            # Update average rewards every bin
+            steps_per_bin = steps // num_bins
+            if (step + 1) % steps_per_bin == 0 or step == steps - 1:
+                avg_reward_bin_index = step // steps_per_bin
+                avg_rewards[avg_reward_bin_index] = np.mean(
+                    all_rewards[-steps_per_bin:])
 
-        return state_action_values, avg_rewards
+        # Duplicate Q-values across all states
+        state_action_values = np.tile(self.Q, (n_states, 1))
+        return state_action_values, np.array(avg_rewards)
 
     def predict(self, env, state_action_values):
         """
@@ -163,7 +157,24 @@ class MultiArmedBandit:
             over the course  of the episode. Should be of length K, where K is
             the number of steps taken within the episode.
         """
-        # reset environment before your first action
-        env.reset()
 
-        raise NotImplementedError
+        # reset environment before your first action
+        state = env.reset()[0]
+        states = []
+        actions = []
+        rewards = []
+        terminated, truncated = False, False
+
+        while not (terminated or truncated):
+            # Exploit action
+            action = src.random.choice(np.flatnonzero(self.Q == self.Q.max()))
+            next_state, reward, terminated, truncated, _ = env.step(action)
+
+            # Log the results
+            states.append(state)
+            actions.append(action)
+            rewards.append(reward)
+
+            state = next_state
+
+        return np.array(states), np.array(actions), np.array(rewards)
